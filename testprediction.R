@@ -63,7 +63,6 @@ table(as.character(oddday$peer_educator_id))
 # 1. most frequent site that day within X km of original site
 # 2. (if above is NA) majority site across all visits
 
-
 ### Find distances between subdistricts (sites_mapped not good)
 setwd("C:/Asha/High/Insight/Project/data_files/zenysis_data/")
 site_long = aggregate(SiteLon~site, data = visits_no_a2, unique)
@@ -101,7 +100,6 @@ for(i in names(distmatrix))
   }
 }
 nearby
-
 
 
 ### unique_id(_2) cleanup step 2: exclude unique_id_2 == "" or "23"
@@ -187,8 +185,8 @@ length(unique(as.character(visits_manysites$homesite)))
 unique(as.character(visits_manysites$site))
 unique(as.character(nearby$homesite))       
 
-# Find PE by Site
 
+# Find PE by Site
 pe_site = aggregate(site~peer_educator_id, data = visits, FUN = function(x){y1 = table(x);
 y2 = sort(y1, decreasing = T);
 if(length(y2) == 1)
@@ -475,40 +473,6 @@ popbydist
 visits_1site_unique =merge(visits_1site_unique, popbydist, by = "district", all.x = T, all.y = F)
 
 
-
-# # Change class of columns
-# numcols = names(visits_1site_unique)[(names(visits_1site_unique) %in% c("sw_birthyr" , "totalbudget", "swperat" , "density", "stime", "censtime"))]
-# categcols = names(visits_1site_unique)[(names(visits_1site_unique) %in% c("sw_birthyr" , "totalbudget", "swperat" , "density", "stime", "censtime") == F)]
-# visits_1site_unique[, numcols] = apply(visits_1site_unique[, numcols], 2, FUN = function(x){y = as.numeric(as.character(x))})
-# class(visits_1site_unique$stime)
-# for (i in categcols)
-# {
-#   visits_1site_unique[, i] = as.factor(visits_1site_unique[, i])
-# }
-# lapply(names(visits_1site_unique), FUN = function(x){class(visits_1site_unique[, x])})
-# #lapply(categcols, FUN = function(x){length(levels(serv_rf1[, x]))})
-
-
-
-
-# Do very rough survival analysis
-library(survival)
-visits_1site_unique$start = as.Date(as.character(visits_1site_unique$first_date)) - as.Date("2016-04-01")
-visits_1site_unique$stop = visits_1site_unique$start + visits_1site_unique$stime
-surv = Surv(visits_1site_unique$start, visits_1site_unique$stop, visits_1site_unique$censtime)
-smod = coxph(surv~strata(first_quart) + sw_birthyr + strata(sw_sex) + swperat + totalbudget + density
-             + strata(subdistrict), data = visits_1site_unique)
-summary(smod)
-
-# Try with just returned data
-test3 = visits_1site_unique[which(visits_1site_unique$censtime == 1),]
-head(test3)
-test3$start = as.Date(as.character(test3$first_date)) - as.Date("2016-04-01")
-test3$stop = test3$start + test3$stime
-surv = Surv(test3$start, test3$stop, test3$censtime)
-smod = coxph(surv~strata(first_quart)+sw_birthyr + strata(sw_sex) + swperat + totalbudget + density
-             +strata(subdistrict), data = test3)
-summary(smod)
 
 
 ### Minimum care package
@@ -807,17 +771,7 @@ sw_1site$tb_test = 0
 sw_1site$tb_test[which(is.na(sw_1site$tb_test_date) == F)] = 1
 
 
-
-
-
-t2 = Sys.time()
-t2-t1
-
-
 sort(names(sw_1site))
-
-"numtests"; "twoormore"
-
 # Possibly important features
 # SW level
 c("first_quart.x", "hiv_known", 
@@ -934,7 +888,7 @@ abline(a=0,b=1,lwd=2,lty=2,col="gray")
 
 
 library(caret)
-### CHECK if threshold = 0.5 is correct
+# Threshold of 0.5 seems acceptable
 melpred_hiv_class = rep(0, length(melpred_hiv))
 melpred_hiv_class[which(melpred_hiv>0.5)] = 1 
 xtab = table(melpred_hiv_class, testdata$hiv_test)
@@ -984,7 +938,6 @@ plot(pred3_std,main="STD Test: ROC Curve for Hierarchical Logistic Model",col=2,
 abline(a=0,b=1,lwd=2,lty=2,col="gray")
 
 
-### CHECK if threshold = 0.5 is correct
 melpred_std_class = rep(0, length(melpred_std))
 melpred_std_class[which(melpred_std>0.5)] = 1 
 xtab = table(melpred_std_class, testdata$std_test)
@@ -1040,7 +993,6 @@ plot(pred4,main="Precision Curve",col=2,lwd=2, ylim = c(0,1))
 abline(v = 0.5)
 
 
-### CHECK if threshold = 0.5 is correct
 melpred_tb_class = rep(0, length(melpred_tb))
 melpred_tb_class[which(melpred_tb>0.5)] = 1 
 xtab = table(melpred_tb_class, testdata$tb_test)
